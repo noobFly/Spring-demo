@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+			http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd"
+	default-lazy-init="false">
+
+	<!-- 提供方应用信息，用于计算依赖关系 ; 不是匹配条件，不要与提供方一样 -->
+	<dubbo:application name="${dubbo.application.name}"
+		owner="${dubbo.application.owner}" logger="slf4j" />
+	<!-- 使用zookeeper暴露服务地址 -->
+	<dubbo:registry id="registry" protocol="zookeeper"
+		address="${dubbo.registry.address}" register="true"
+		timeout="${dubbo.provider.timeout}" />
+	<!-- 用dubbo协议在20898端口暴露服务 ${dubbo.port} -->
+	<dubbo:protocol name="dubbo" port="${dubbo.port}"
+		dispather="all" threadpool="cached" threads="300" />
+	<!-- 调用服务x秒超时,不重试. 配置dubbo filter 拦截api接口 放置transcationId到MDC用于日志记录 -->
+	<dubbo:provider timeout="${dubbo.provider.timeout}"
+		filter="transIdFilter" retries="${dubbo.provider.retries}" />
+	<!-- 监控 -->
+	<dubbo:monitor protocol="registry" />
+	<dubbo:consumer check="false" timeout="${dubbo.consumer.timeout}"
+		retries="${dubbo.consumer.retries}" />
+
+</beans>
